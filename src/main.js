@@ -5,6 +5,11 @@ import { daysName } from "./constants/days-name";
 import { DAYS_IN_WEEK } from "./constants/zaebal";
 import { MONTHS_IN_YEAR } from "./constants/zaebal";
 
+// доделать кнопку удалить
+// добавить валидацию ввода
+// добавить мн выбор
+// прикрутить стили
+
 const currentDate = {
     year: new Date().getFullYear(),
     _month: new Date().getMonth(),
