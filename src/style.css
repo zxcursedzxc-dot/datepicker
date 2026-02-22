@@ -1,0 +1,88 @@
+/* body {
+    background-color: rgb(180, 180, 180);
+} */
+
+main {
+    width: 280px;
+}
+
+header {
+    width: 275px;
+    /* gap: 20px; */
+    display: flex;
+    flex-wrap: wrap;
+    
+    font-size: 22px;
+
+    justify-content: space-between;
+
+}
+
+.btn-switch {
+    width: 30px;
+    height: 25px;
+    font-size: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.cell-container {
+    display: flex;
+    flex-wrap: wrap;
+    width: 275px;
+    gap: 5px;
+
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+    font-size: 20px;
+}
+
+.calendar-base {
+    cursor: pointer;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    color: black;
+    transition: 0.15s ease;
+}
+
+.selected-cell {
+    background-color: rgb(212, 114, 231);
+}
+
+.day-of-week {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+}
+
+.calendar-base:hover {
+    background-color: rgb(213, 213, 224);
+}
+.calendar-base:focus
+
+[iscurrentmonth='true'] {
+    font-size: 22px;
+}
+
+[iscurrentmonth='false'] {
+    font-size: 18px;
+    opacity: 0.4;
+}
+
+[isweekend='true'] {
+    color: rgba(255, 0, 0);
+}
+
+.note-input {
+    min-width: 275px;
+    min-height: 32px;
+}
