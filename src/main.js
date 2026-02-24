@@ -312,7 +312,7 @@ const createNote = date => {
     input.classList.add('note-input')
     input.addEventListener('keydown', event => noteAction(event, note, input, date)) //можно ли попроще?
     applyBtn.addEventListener('click', event => noteAction(event, note, input, date)) //можно ли попроще?
-    // deleteBtn.addEventListener('click', deleteNote(date))
+    deleteBtn.addEventListener('click', () => deleteNote(date))
     
     note.appendChild(input)
     note.appendChild(applyBtn)
@@ -327,7 +327,7 @@ const noteAction = (event, note, input, date) => {
         
         if (!storeNotesByDates[date]) storeNotesByDates[date] = []
         const textOutput = document.createElement('textarea')
-        textOutput.classList.add('note-input')
+        textOutput.classList.add('note-output')
         textOutput.textContent = input.value
         storeNotesByDates[date].push(textOutput)
         
@@ -337,7 +337,11 @@ const noteAction = (event, note, input, date) => {
 }
 
 const deleteNote = date => {
-    storeNotesByDates[date] = []
+    if (!storeNotesByDates[date]) return
+    document.querySelectorAll('.note-output').forEach(elem => elem.remove())
+    console.log(storeNotesByDates)
+    storeNotesByDates[date].splice(0, )
+    console.log(storeNotesByDates)
 }
 
 const clearSelect = () => {
