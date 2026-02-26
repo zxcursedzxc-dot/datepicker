@@ -1,14 +1,19 @@
 import { monthName } from "./constants/months";
 import { clc } from "./constants/calc-date";
 import { daysName } from "./constants/days-name";
+import { datePattern } from "./constants/date-validation";
 
 import { DAYS_IN_WEEK } from "./constants/zaebal";
 import { MONTHS_IN_YEAR } from "./constants/zaebal";
 
-// доделать кнопку удалить
-// добавить валидацию ввода
 // добавить мн выбор
+//      создать якори
+//      применять к каждой дате между якорями функцию выбора
+//      делать записи в каждой выбранной заметке
 // прикрутить стили
+// добавить удаление каждой заметки по отдельности
+
+// доработать валидацию ввода 
 
 const currentDate = {
     year: new Date().getFullYear(),
@@ -94,7 +99,7 @@ const setupDates = () => {
         day.isCurrentMonth = currentDate.month === day.date.getMonth();
         if (day.date < firstDate()) day.addEventListener('click', funcPrevMonth)
         if (day.date > firstDate() && !day.isCurrentMonth) day.addEventListener('click', funcNextMonth)
-        if (day.isCurrentMonth) day.addEventListener('click', funcSelect)
+        if (day.isCurrentMonth) day.addEventListener('click', selectDate)
         
         day.isWeekend = 
         day.date.getDay() === 6 || day.date.getDay() === 0;
@@ -282,7 +287,7 @@ const createWeek = () => {
     return week;
 }
 
-const funcSelect = event => {
+const selectDate = event => {
     let item
     if (event?.target) item = event.target
         else item = event
@@ -350,18 +355,38 @@ const clearSelect = () => {
     document.querySelector('.note-body')?.remove()
 }
 
-const renderFromInput = event => {
-    if (event.key != 'Enter') return
+const selectFromInput = (event) => {
+    if (event.key !== 'Enter') return
+    
+    if (/[^0-9\.]/.test(input.value)) {
+        debil()
+        return
+    }
+
     const inputDate = input.value.split('.')
-    currentDate.date = Number(inputDate[0])
-    currentDate.month = Number(inputDate[1] - 1)
-    currentDate.year = Number(inputDate[2])
-    renderSelectedMonth();
+    const dateFromInput = new Date(inputDate[2], inputDate[1] - 1, inputDate[0])
+
+    if (dateFromInput.getDate() === +inputDate[0] &&
+    dateFromInput.getMonth() === +inputDate[1] - 1 &&
+    dateFromInput.getFullYear() === +inputDate[2]) {
+        currentDate.date = Number(inputDate[0])
+        currentDate.month = Number(inputDate[1] - 1)
+        currentDate.year = Number(inputDate[2])
+        renderSelectedMonth();
+    }
+}
+
+const debil = () => {
+    alert('invalid blyat')
 }
 
 const input = document.createElement('input')
-input.addEventListener('keydown', renderFromInput)
+input.pattern = datePattern
+input.placeholder = 'dd.mm.yyyy'
+input.addEventListener('keydown', selectFromInput)
 main.appendChild(input)
 
 renderSelectedMonth();
-funcSelect(storeDays.find(day => day.date.getDate() === currentDate.date))
+selectDate(storeDays.find(day => day.date.getDate() === currentDate.date &&
+    day.date.getMonth() === currentDate.month))
+console.log(currentDate)

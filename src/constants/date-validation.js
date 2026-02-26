@@ -1,0 +1,1 @@
+export const datePattern = /[0-9.]*/
