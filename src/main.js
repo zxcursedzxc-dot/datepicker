@@ -6,14 +6,12 @@ import { datePattern } from "./constants/date-validation";
 import { DAYS_IN_WEEK } from "./constants/zaebal";
 import { MONTHS_IN_YEAR } from "./constants/zaebal";
 
-// добавить мн выбор
-//      создать якори
-//      применять к каждой дате между якорями функцию выбора
-//      делать записи в каждой выбранной заметке
-// прикрутить стили
-// добавить удаление каждой заметки по отдельности
+/*
+прикрутить стили
+добавить удаление каждой заметки по отдельности
 
-// доработать валидацию ввода 
+доработать валидацию ввода 
+*/
 
 const currentDate = {
     year: new Date().getFullYear(),
@@ -47,7 +45,7 @@ const firstDate = () => {
 const startsWithDay = () => {
     return firstDate().getDay() === 0 ? 7 : firstDate().getDay();
 }
-const firstCell = () => {
+const firstCellTime = () => {
     return (firstDate() - (startsWithDay() - 1) * clc.day);
 }
 
@@ -59,10 +57,11 @@ const storeWeek = [];
 const storeMonths = [];
 const storeYears = [];
 const selectedDates = []
+const selectAnchors = []
 const storeNotesByDates = {}
 
 const createDates = (storeDates, amountOfWeeks = 1) => {
-    for (let cell = firstCell(); 
+    for (let cell = firstCellTime(); 
          storeDates.length < DAYS_IN_WEEK * amountOfWeeks; 
          cell += clc.day) {
         const day = document.createElement('div');
@@ -109,6 +108,7 @@ const setupDates = () => {
             day.setAttribute(key, day[key]);
             day.textContent = day.date.getDate();
         }
+        
     });
 }
 
@@ -170,6 +170,7 @@ const renderSelectedMonth = () => {
     main.appendChild(createWeek());
     main.appendChild(buildDates(datesCallback));
     document.body.appendChild(main);
+    addSelectionHadnler()
 }
 
 const renderSelectedYear = () => {    
@@ -277,7 +278,7 @@ const createHeaderDecade = (title = Math.floor(currentDate.year / 10) * 10
 const createWeek = () => {
     const week = document.createElement('div');
     week.classList.add('cell-container')
-    for (let cell = firstCell(); storeWeek.length < DAYS_IN_WEEK; cell += clc.day) {
+    for (let cell = firstCellTime(); storeWeek.length < DAYS_IN_WEEK; cell += clc.day) {
         const day = document.createElement('div');
         day.textContent = daysName[new Date(cell).getDay()];
         day.classList.add('clearable', 'day-of-week');
@@ -291,18 +292,26 @@ const selectDate = event => {
     let item
     if (event?.target) item = event.target
         else item = event
-    if (selectedDates.includes(item)) {
-        clearSelect()
-        return
+    
+    if (selectAnchors.length > 1) clearSelect()
+        
+    selectAnchors.push(item)
+        
+    if (selectAnchors.length > 1) {
+    selectAnchors.sort((a, b) => a.date - b.date)
+
+    for (let cellTime = +selectAnchors[0].date; 
+    cellTime <= +selectAnchors[1]?.date; 
+    cellTime += clc.day) {
+        selectedDates.push(new Date(cellTime))
     }
-    clearSelect()
-    selectedDates.push(item)
-    selectedDates.forEach(elem => elem.classList.add('selected-cell'))
-    currentDate.date = item.date.getDate()
-    createNote(item.date);
+    
+    addSelectionHadnler()
+    createNote();
+    }
 }
 
-const createNote = date => {
+const createNote = () => {
     const note = document.createElement('main')
     const input = document.createElement('textarea')
     const applyBtn = document.createElement('button')
@@ -315,44 +324,61 @@ const createNote = date => {
     deleteBtn.textContent = 'del'
 
     input.classList.add('note-input')
-    input.addEventListener('keydown', event => noteAction(event, note, input, date)) //можно ли попроще?
-    applyBtn.addEventListener('click', event => noteAction(event, note, input, date)) //можно ли попроще?
-    deleteBtn.addEventListener('click', () => deleteNote(date))
+    input.addEventListener('keydown', event => noteAction(event, note, input)) //можно ли попроще?
+    applyBtn.addEventListener('click', event => noteAction(event, note, input)) //можно ли попроще?
+    deleteBtn.addEventListener('click', () => deleteNote())
     
     note.appendChild(input)
     note.appendChild(applyBtn)
     note.appendChild(deleteBtn)
-    storeNotesByDates[date]?.forEach(elem => note.appendChild(elem))
+    showNoteHandler(note)
     document.body.appendChild(note)
 }
 
-const noteAction = (event, note, input, date) => {
+const noteAction = (event, note, input) => {
     if (event.key === 'Enter' && event.ctrlKey || event.type === 'click') {
         if(!input.value) return
         
-        if (!storeNotesByDates[date]) storeNotesByDates[date] = []
-        const textOutput = document.createElement('textarea')
-        textOutput.classList.add('note-output')
-        textOutput.textContent = input.value
-        storeNotesByDates[date].push(textOutput)
+        selectedDates.forEach(element => {
+            if (!storeNotesByDates[element]) storeNotesByDates[element] = []
+            const textOutput = document.createElement('textarea')
+            textOutput.classList.add('note-output')
+            textOutput.textContent = input.value
+            storeNotesByDates[element].push(textOutput)
+        });
         
         input.value = ''
-        note.appendChild(textOutput)
+        showNoteHandler(note)
     }
 }
 
-const deleteNote = date => {
-    if (!storeNotesByDates[date]) return
-    document.querySelectorAll('.note-output').forEach(elem => elem.remove())
-    console.log(storeNotesByDates)
-    storeNotesByDates[date].splice(0, )
-    console.log(storeNotesByDates)
+const showNoteHandler = note => storeNotesByDates[selectAnchors[0].date]
+                              ?.forEach(elem => note.appendChild(elem))
+
+const deleteNote = () => {
+    selectedDates.forEach(date => {
+        if (!storeNotesByDates[date]) return
+        document.querySelectorAll('.note-output').forEach(elem => elem.remove())
+        storeNotesByDates[date].splice(0, )
+    })
+    
+}
+
+const addSelectionHadnler = () => {
+    storeDays.forEach(day => {
+        if (selectAnchors[0]?.date.getTime() <= day.date.getTime() 
+        && day.date.getTime() <= selectAnchors[1]?.date.getTime())
+            day.classList.add('selected-cell')
+    })
 }
 
 const clearSelect = () => {
-    selectedDates.forEach(elem => elem.classList.remove('selected-cell'))
+    document.querySelectorAll('.selected-cell').
+    forEach(elem => elem.classList.remove('selected-cell'))
+    document.querySelectorAll('.note-body').forEach(elem => elem.remove())
+    
     selectedDates.splice(0, )
-    document.querySelector('.note-body')?.remove()
+    selectAnchors.splice(0, )
 }
 
 const selectFromInput = (event) => {
@@ -387,6 +413,7 @@ input.addEventListener('keydown', selectFromInput)
 main.appendChild(input)
 
 renderSelectedMonth();
-selectDate(storeDays.find(day => day.date.getDate() === currentDate.date &&
-    day.date.getMonth() === currentDate.month))
+// selectDate(storeDays.find(day => day.date.getDate() === currentDate.date &&
+//     day.date.getMonth() === currentDate.month))
+
 console.log(currentDate)
